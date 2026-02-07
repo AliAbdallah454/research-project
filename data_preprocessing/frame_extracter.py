@@ -1,5 +1,4 @@
 import os
-import shutil
 import cv2
 
 def get_frames_1hz(video_path, output_dir, resize=None, jpg_quality=95):
@@ -44,7 +43,7 @@ def get_frames_1hz(video_path, output_dir, resize=None, jpg_quality=95):
     return saved
 
 
-sessions_path = "./data/Cornia/"
+sessions_path = "../data/Cornia/"
 for session in os.listdir(sessions_path):
 
   if '.zip' in session or '.DS_Store' in session:

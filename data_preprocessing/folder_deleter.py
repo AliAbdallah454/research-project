@@ -37,5 +37,5 @@ def delete_all_video_frames_folders(sessions_path: str):
     print(f"Done. Deleted {deleted} 'video_frames' folders.")
     return deleted
 
-sessions_path = "./data/Cornia/"
+sessions_path = "../data/Cornia/"
 delete_all_video_frames_folders(sessions_path)

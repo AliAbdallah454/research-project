@@ -2,8 +2,8 @@ import os
 import shutil
 
 def copy_processed_data(
-    sessions_path: str = "./data/Cornia/",
-    out_root: str = "./processed_data",
+    sessions_path: str = "../data/Cornia/",
+    out_root: str = "../data/processed_data",
     frames_dir_name: str = "video_frames",
     results_file_name: str = "normalized_results_manual.txt",
 ) -> int:
@@ -74,8 +74,8 @@ def copy_processed_data(
 
 # Example usage:
 n = copy_processed_data(
-    sessions_path="./data/Cornia/",
-    out_root="./data/processed_data",
+    sessions_path="../data/Cornia/",
+    out_root="../data/processed_data",
     frames_dir_name="video_frames",
     results_file_name="normalized_results_manual.txt"
 )
