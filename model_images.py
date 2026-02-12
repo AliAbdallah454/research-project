@@ -20,7 +20,7 @@ def build_args():
 
 args = build_args()
 
-model_path = f"./models/circle_regressor_v1.pt"
+model_path = f"./models/circle_regressor_ResNet18_v1.pt"
 
 device = 'cpu'
 
@@ -40,7 +40,7 @@ val_tf = T.Compose([
 session = args.session
 participant = args.participant
 fram_nb = args.frame
-
+ 
 img = f"./data/processed_data/Session{session}_Light/Participant{participant}/video_frames/img{fram_nb}.jpg"
 
 if not os.path.exists(img):

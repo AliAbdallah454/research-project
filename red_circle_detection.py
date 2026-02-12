@@ -1,7 +1,11 @@
 import cv2
 import numpy as np
 
-def detect_red_circle(frame):
+from typing import Tuple
+
+def detect_red_circle(frame: np.ndarray)-> Tuple[np.ndarray | None, Tuple[float, float, float]]:
+
+    h, w, c = frame.shape
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -32,9 +36,9 @@ def detect_red_circle(frame):
         else:
             (x, y), r = cv2.minEnclosingCircle(c)
             x, y, r = int(round(x)), int(round(y)), int(round(r))
-            return mask, x, y, r
-        return None, 0, 0, 0
-    return None, 0, 0, 0
+            return mask, (x/w, y/h, r/min(w, h))
+        return None, (0, 0, 0)
+    return None, (0, 0, 0)
 
 if __name__ == "__main__":
         

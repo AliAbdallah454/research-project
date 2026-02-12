@@ -2,7 +2,11 @@ import math
 import numpy as np
 import torch
 
-def circle_iou(c1: tuple[float, float, float], c2: tuple[float, float, float], eps=1e-12):
+from typing import Tuple
+
+Circle = Tuple[float, float, float]
+
+def circle_iou(c1: Circle, c2: Circle, eps=1e-12):
     """
     IoU of two circles.
     c1, c2: (cx, cy, r)
@@ -120,6 +124,30 @@ def circle_iou_torch(c1: torch.Tensor, c2: torch.Tensor, eps: float = 1e-12) -> 
 
     return iou.clamp(0.0, 1.0)
 
+def center_error_norm(pred: Circle, gt: Circle, eps: float = 1e-12) -> float:
+    """
+    Center error for normalized circles.
+    Returns Euclidean distance in normalized units (0..~sqrt(2)).
+    """
+    px, py, _ = map(float, pred)
+    gx, gy, _ = map(float, gt)
+    return math.hypot(px - gx, py - gy)
+
+def temporal_stability_norm(prev: Circle, curr: Circle, radius_weight: float = 1.0, eps: float = 1e-12) -> float:
+    """
+    Temporal stability (jitter) between consecutive circles (usually predictions),
+    in normalized units.
+
+    jitter = sqrt( dx^2 + dy^2 + (radius_weight * dr)^2 )
+    """
+    x0, y0, r0 = map(float, prev)
+    x1, y1, r1 = map(float, curr)
+
+    dx = x1 - x0
+    dy = y1 - y0
+    dr = r1 - r0
+
+    return math.sqrt(dx*dx + dy*dy + (radius_weight * dr) * (radius_weight * dr))
 
 if __name__ == "__main__":
 
