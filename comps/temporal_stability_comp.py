@@ -4,16 +4,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import os
+
 from helpers import read_manual_results, predict_on_cv2_frames
+from helpers import get_gt_circles
 
 import torch
-from architectures import CircleRegressor
+from architectures import CircleRegressorResNet
 import torchvision.transforms as T
 
 from metrics import temporal_stability_norm
-from red_circle_detection import detect_red_circle
+from classical_methods.red_circle_detection import detect_red_circle
 from tqdm import tqdm
-from helpers import get_gt_circles
 
 from typing import Tuple
 
@@ -32,7 +33,7 @@ model_path = f"./models/circle_regressor_ResNet18_v1.pt"
 
 device = 'cpu'
 
-model = CircleRegressor(pretrained=True)
+model = CircleRegressorResNet(backbone='resnet18', pretrained=True)
 state = torch.load(model_path, map_location=device)
 model.load_state_dict(state)
 model.eval()

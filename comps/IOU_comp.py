@@ -1,28 +1,20 @@
-import sys
-from pathlib import Path
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
 import cv2
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
 import os
-from helpers import read_manual_results, predict_on_cv2_frames
 
 import torch
-from architectures import CircleRegressor
 import torchvision.transforms as T
 
-from metrics import circle_iou
-from red_circle_detection import detect_red_circle
 from tqdm import tqdm
-from helpers import get_gt_circles
 
-from typing import Tuple
+from classical_methods.red_circle_detection import detect_red_circle
 
-import os
+from src.metrics import circle_iou
+from src.architectures import CircleRegressorResNet
+from src.helpers import get_gt_circles, read_manual_results, predict_on_cv2_frames
+
 import argparse
 
 print("cwd: ", os.getcwd())
@@ -39,7 +31,7 @@ model_path = f"./models/circle_regressor_ResNet18_v1.pt"
 
 device = 'cpu'
 
-model = CircleRegressor(pretrained=True)
+model = CircleRegressorResNet(backbone='resnet18', pretrained=True)
 state = torch.load(model_path, map_location=device)
 model.load_state_dict(state)
 model.eval()
