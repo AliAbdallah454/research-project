@@ -56,7 +56,7 @@ def get_input_target_lists(participants: List[str]):
                 
     return images, targets
 
-def get_loaders(root_path: str, seed: int = 43):
+def get_loaders(root_path: str, batch_size:int = 16, seed: int = 43):
 
     participants = load_participants(root_path)
     participants = sorted(participants)
@@ -83,8 +83,8 @@ def get_loaders(root_path: str, seed: int = 43):
     val_ds = ProcessedDataset(val_images, val_targets, transform=val_tf)
     test_ds = ProcessedDataset(test_images, test_targets, transform=val_tf)
 
-    train_dl = DataLoader(train_ds, batch_size=32, shuffle=True)
-    val_dl  = DataLoader(val_ds, batch_size=32, shuffle=False)
-    test_dl = DataLoader(test_ds, batch_size=32, shuffle=False)
+    train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+    val_dl  = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
+    test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
 
     return train_dl, val_dl, test_dl
