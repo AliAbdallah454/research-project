@@ -1,5 +1,4 @@
 import torch
-from architectures import CircleRegressorResNet
 import torchvision.transforms as T
 
 import cv2
@@ -7,7 +6,8 @@ import cv2
 import argparse
 from typing import Tuple
 
-from helpers import predict_on_cv2_frames
+from src.helpers import predict_on_cv2_frames
+from src.architectures import CircleRegressorResNet
 
 mean = (0.485, 0.456, 0.406)
 std  = (0.229, 0.224, 0.225)
@@ -17,24 +17,26 @@ val_tf = T.Compose([
     T.Normalize(mean=mean, std=std)
 ])
 
-model_path = f"./models/circle_regressor_ResNet50.pt"
-# model_path = f"./models/circle_regressor_ResNet18_v1.pt"
-
-device = 'cpu'
-
-model = CircleRegressorResNet(backbone='resnet50', pretrained=True)
-state = torch.load(model_path, map_location=device)
-model.load_state_dict(state)
-model.eval()
-
 def build_args():
     p = argparse.ArgumentParser(description="Run CircleRegressor on one frame.")
     p.add_argument("--session", type=int, required=True, help="Session number, e.g. 2")
     p.add_argument("--participant", type=int, required=True, help="Participant number, e.g. 14")
-
+    p.add_argument("--model", required=True, help="Path of model")
     return p.parse_args()
 
 args = build_args()
+
+model_path = args.model
+
+if 'resnet34' in model_path:
+    model = CircleRegressorResNet(backbone='resnet34', pretrained=True)
+else:
+    model = CircleRegressorResNet(backbone='resnet18', pretrained=True)
+
+device = 'cpu'
+state = torch.load(model_path, map_location=device)
+model.load_state_dict(state)
+model.eval()
 
 def denorm_circle(c, w, h):
     x = int(round(c[0] * w))
