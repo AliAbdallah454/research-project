@@ -17,6 +17,8 @@ from src.helpers import get_gt_circles, read_manual_results, predict_on_cv2_fram
 
 import argparse
 
+from typing import List
+
 print("cwd: ", os.getcwd())
 
 mean = (0.485, 0.456, 0.406)
@@ -27,6 +29,7 @@ val_tf = T.Compose([
     T.Normalize(mean=mean, std=std)
 ])
 
+# model_path = f"./models/circle_regressor_ResNet18_v1.pt"
 model_path = f"./models/circle_regressor_ResNet18_v1.pt"
 
 device = 'cpu'
@@ -40,6 +43,7 @@ def build_args():
     p = argparse.ArgumentParser(description="Run CircleRegressor on one frame.")
     p.add_argument("--session", type=int, required=True, help="Session number, e.g. 2")
     p.add_argument("--participant", type=int, required=True, help="Participant number, e.g. 14")
+    p.add_argument("--models", nargs='+', required=True, help="one or more model paths")
 
     return p.parse_args()
 
@@ -47,6 +51,38 @@ args = build_args()
 
 session = args.session
 participant = args.participant
+model_paths = args.models
+
+device = 'cpu'
+
+def load_model(model_path: str) -> CircleRegressorResNet:
+
+    if 'resnet18' in model_path or 'ResNet18' in model_path:
+        model = CircleRegressorResNet(backbone='resnet18', pretrained=True)
+    elif 'resnet34' in model_path:
+        model = CircleRegressorResNet(backbone='resnet34', pretrained=True)
+
+    state = torch.load(model_path, map_location=device)
+    model.load_state_dict(state)
+    model.eval()
+
+    return model, model_path.split('.')[-2]
+
+class Mod:
+
+    def __init__(self, model, name):
+        self.model = model
+        self.name = name
+        self.r_ious = []
+        self.g_ious = []
+
+mods: List[Mod] = []
+
+for model_path in args.models:
+    print("Loading: ", model_path)
+    model, name = load_model(model_path)
+    print(name)
+    mods.append(Mod(model, name))
 
 par = f"./data/processed_data/Session{session}_Light/Participant{participant}"
 
@@ -54,11 +90,6 @@ manual_path = os.path.join(par, "normalized_results_manual.txt")
 frames_path = os.path.join(par, "video_frames")
 
 df = read_manual_results(manual_path)
-
-r_ious = []
-g_ious = []
-model_r_ious = []
-model_g_ious = []
 
 w = 640
 h = 360
@@ -72,42 +103,24 @@ for i in tqdm(range(len(df)), total=len(df), desc="Processing frames"):
     image_path = os.path.join(frames_path, f"img{time}.jpg")
     img = cv2.imread(image_path, cv2.IMREAD_COLOR)
 
-    r_model, g_model = predict_on_cv2_frames(model, img, transform=val_tf, device='cpu')
-    _, r_class = detect_red_circle(img)
-    g_class = (r_class[0], r_class[1], r_class[2] * 2.4)
-
-    iou_r = circle_iou(r_gt, r_class)
-    iou_g = circle_iou(g_gt, g_class)
-    model_r_iou = circle_iou(r_gt, r_model)
-    model_g_iou = circle_iou(g_gt, g_model)
-
-    r_ious.append(iou_r)
-    g_ious.append(iou_g)
-    model_r_ious.append(model_r_iou)
-    model_g_ious.append(model_g_iou)
+    for mod in mods:
+        r, g = predict_on_cv2_frames(mod.model, img, transform=val_tf, device='cpu')
+        mod.r_ious.append(circle_iou(r_gt, r))
+        mod.g_ious.append(circle_iou(g_gt, g))
 
 
-ious = np.array(r_ious, dtype=float)
-model_r_ious = np.array(model_r_ious, dtype=float)
-
-x = np.arange(len(ious))
+x = np.arange(len(mods[0].r_ious))
 
 window = 25
 kernel = np.ones(window) / window
 
-smooth = np.convolve(ious, kernel, mode="same")
-model_smooth = np.convolve(model_r_ious, kernel, mode="same")
-
 alpha = 1
 
 plt.figure(figsize=(10, 4))
-plt.plot(x, r_ious, alpha=alpha, linewidth=1, label="IoU (raw) Red")
-plt.plot(x, g_ious, alpha=alpha, linewidth=1, label="IoU (raw) Green")
-plt.plot(x, model_r_ious, alpha=alpha, linewidth=1, label="IoU Model-ResNet18(raw) Red")
-plt.plot(x, model_g_ious, alpha=alpha, linewidth=1, label="IoU Model-ResNet18(raw) Green")
 
-# plt.plot(x, smooth, linewidth=2, label=f"IoU (rolling mean, w={window})")
-# plt.plot(x, model_smooth, linewidth=2, label=f"IoU Model (rolling mean, w={window})")
+for mod in mods:
+    plt.plot(x, mod.r_ious, alpha=alpha, linewidth=1, label=f"IoU {mod.name} Red")
+    plt.plot(x, mod.g_ious, alpha=alpha, linewidth=1, label=f"IoU {mod.name} Green")
 
 plt.ylim(0, 1)
 plt.xlabel("Time (frame/step)")
