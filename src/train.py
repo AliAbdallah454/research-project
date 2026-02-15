@@ -15,18 +15,20 @@ from src.data import get_loaders
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--model", required=True, help="Model name or path")
+    p.add_argument("--resnet", required=True, help="ResNet type")
     p.add_argument("--data", required=True, help="Dataset root or config path")
     p.add_argument("--batch", type=int, required=True, help="Batch size")
     p.add_argument("--output", required=True, help="Output path for model")
+    p.add_argument("--epochs", type=int, required=True, help="Number of training epochs")
     return p.parse_args()
 
 args = parse_args()
 
 root_path = args.data
-resnet = args.model
+resnet = args.resnet
 batch_size = args.batch
 output_path = args.output
+epochs = args.epochs
 
 if os.path.exists(output_path):
     raise FileExistsError("Model already exists")
@@ -54,12 +56,12 @@ def circle_loss(preds, targets, w_center=1.0, w_radius=2.0, beta=0.02):
 
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
-epochs = 5
 LOSS_FN = circle_loss
 
 min_val_loss = float('inf')
 
 print(f"Training Started {resnet} on {root_path}")
+print(f"running for {epochs} epochs")
 for epoch in range(1, epochs + 1):
 
     epoch_start = time.time()
