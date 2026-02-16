@@ -20,6 +20,10 @@ def parse_args():
     p.add_argument("--batch", type=int, required=True, help="Batch size")
     p.add_argument("--output", required=True, help="Output path for model")
     p.add_argument("--epochs", type=int, required=True, help="Number of training epochs")
+
+    p.add_argument("--w-center", type=int, default=1.0, help="Penalty of center loss")
+    p.add_argument("--w-radius", type=int, default=2.0, help="Penalty of radius loss")
+
     return p.parse_args()
 
 args = parse_args()
@@ -29,6 +33,10 @@ resnet = args.resnet
 batch_size = args.batch
 output_path = args.output
 epochs = args.epochs
+w_center = args.w_center
+w_radius = args.w_radius
+
+print(w_center, w_radius)
 
 if os.path.exists(output_path):
     raise FileExistsError("Model already exists")
@@ -76,7 +84,7 @@ for epoch in range(1, epochs + 1):
         targets = targets.to(device).float()
 
         preds = model(imgs)
-        loss = LOSS_FN(preds, targets)
+        loss = LOSS_FN(preds, targets, w_center=w_center, w_radius=w_radius)
 
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
