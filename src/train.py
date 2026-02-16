@@ -12,6 +12,7 @@ from itertools import islice
 
 from src.architectures import CircleRegressorResNet
 from src.data import get_loaders
+from eval.metrics import circle_iou_torch
 
 def parse_args():
     p = argparse.ArgumentParser()
@@ -21,8 +22,11 @@ def parse_args():
     p.add_argument("--output", required=True, help="Output path for model")
     p.add_argument("--epochs", type=int, required=True, help="Number of training epochs")
 
-    p.add_argument("--w-center", type=int, default=1.0, help="Penalty of center loss")
-    p.add_argument("--w-radius", type=int, default=2.0, help="Penalty of radius loss")
+    p.add_argument("--w-center", type=float, default=1.0, help="Penalty of center loss")
+    p.add_argument("--w-radius", type=float, default=2.0, help="Penalty of radius loss")
+    p.add_argument("--w-iou", type=float, default=0.0, help="Penalty of IOU")
+    p.add_argument("--w-iou-c1", type=float, default=1.0, help="Penalty of IOU circle1")
+    p.add_argument("--w-iou-c2", type=float, default=1.0, help="Penalty of IOU circle2")
 
     return p.parse_args()
 
@@ -35,8 +39,9 @@ output_path = args.output
 epochs = args.epochs
 w_center = args.w_center
 w_radius = args.w_radius
-
-print(w_center, w_radius)
+w_iou = args.w_iou
+w_iou_c1 = args.w_iou_c1
+w_iou_c2 = args.w_iou_c2
 
 if os.path.exists(output_path):
     raise FileExistsError("Model already exists")
@@ -48,19 +53,47 @@ print(f"device is: {device}")
 
 model = CircleRegressorResNet(backbone=resnet, pretrained=True, out_dim=6).to(device)
 
-def circle_loss(preds, targets, w_center=1.0, w_radius=2.0, beta=0.02):
+def circle_loss(
+    preds,
+    targets,
+    w_center=1.0,
+    w_radius=2.0,
+    w_iou=1.0,
+    w_iou_c1=1.0,
+    w_iou_c2=1.0,
+    beta=0.02,
+    iou_mode="one_minus",
+    eps=1e-7,
+):
     """
     preds/targets: (B, 6) = [cx1, cy1, r1, cx2, cy2, r2], normalized to [0,1]
     """
-    preds = preds.view(-1, 2, 3)
-    targets = targets.view(-1, 2, 3)
 
-    pc, pr = preds[..., :2], preds[..., 2]   # centers, radii
-    tc, tr = targets[..., :2], targets[..., 2]
+    preds_v = preds.view(-1, 2, 3)
+    targets_v = targets.view(-1, 2, 3)
+
+    pc, pr = preds_v[..., :2], preds_v[..., 2]
+    tc, tr = targets_v[..., :2], targets_v[..., 2]
 
     lc = F.smooth_l1_loss(pc, tc, beta=beta, reduction="mean")
     lr = F.smooth_l1_loss(pr, tr, beta=beta, reduction="mean")
-    return w_center * lc + w_radius * lr
+
+    base = w_center * lc + w_radius * lr
+
+    if w_iou == 0.0:
+        return base
+
+    iou = circle_iou_torch(preds, targets)
+
+    if iou_mode == "log":
+        per_circle = -torch.log(iou.clamp_min(eps))
+    else:
+        per_circle = 1.0 - iou
+
+    liou = (w_iou_c1 * per_circle[:, 0] + w_iou_c2 * per_circle[:, 1]).mean()
+
+    return base + w_iou * liou
+
 
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
@@ -84,7 +117,7 @@ for epoch in range(1, epochs + 1):
         targets = targets.to(device).float()
 
         preds = model(imgs)
-        loss = LOSS_FN(preds, targets, w_center=w_center, w_radius=w_radius)
+        loss = LOSS_FN(preds, targets, w_center=w_center, w_radius=w_radius, w_iou=w_iou, w_iou_c1=w_iou_c1, w_iou_c2=w_iou_c2)
 
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
