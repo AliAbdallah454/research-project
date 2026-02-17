@@ -1,6 +1,8 @@
 import os
 import shutil
 
+from argparse import ArgumentParser
+
 def delete_all_video_frames_folders(sessions_path: str):
     """
     Deletes every 'video_frames' folder under:
@@ -37,5 +39,9 @@ def delete_all_video_frames_folders(sessions_path: str):
     print(f"Done. Deleted {deleted} 'video_frames' folders.")
     return deleted
 
-sessions_path = "../data/Cornia/"
+parser = ArgumentParser()
+parser.add_argument("--data-path", required=True, help="Path of data")
+args = parser.parse_args()
+
+sessions_path = args.data_path
 delete_all_video_frames_folders(sessions_path)

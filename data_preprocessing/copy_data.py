@@ -1,6 +1,8 @@
 import os
 import shutil
 
+import argparse
+
 def copy_processed_data(
     sessions_path: str = "../data/Cornia/",
     out_root: str = "../data/processed_data",
@@ -71,11 +73,18 @@ def copy_processed_data(
 
     return copied
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--data-path", required=True, help="Path to dataset")
+parser.add_argument("--output-path", required=True, help="Path to output directory")
+args = parser.parse_args()
+
+sessions_path = args.data_path
+output_path = args.output_path
 
 # Example usage:
 n = copy_processed_data(
-    sessions_path="../data/Cornia/",
-    out_root="../data/processed_data",
+    sessions_path=sessions_path,
+    out_root=output_path,
     frames_dir_name="video_frames",
     results_file_name="normalized_results_manual.txt"
 )

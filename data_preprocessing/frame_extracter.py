@@ -1,6 +1,8 @@
 import os
 import cv2
 
+import argparse
+
 def get_frames_1hz(video_path, output_dir, resize=None, jpg_quality=95):
 
     if resize is not None:
@@ -42,8 +44,12 @@ def get_frames_1hz(video_path, output_dir, resize=None, jpg_quality=95):
     cap.release()
     return saved
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--data-path", required=True, help="Path to dataset")
+args = parser.parse_args()
 
-sessions_path = "../data/Cornia/"
+sessions_path = args.data_path
+
 for session in os.listdir(sessions_path):
 
   if '.zip' in session or '.DS_Store' in session:

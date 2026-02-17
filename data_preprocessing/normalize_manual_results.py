@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 
+import argparse
+
 expected_cols = [
     "Time in s",
     "Defined zone",
@@ -81,5 +83,12 @@ def normalize_results_manual_in_tree(
 
 
 # Example usage:
-n = normalize_results_manual_in_tree("../data/Cornia/", image_size=(1920, 1080))
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--data-path", required=True, help="Path to dataset")
+args = parser.parse_args()
+
+sessions_path = args.data_path
+
+n = normalize_results_manual_in_tree(sessions_path, image_size=(1920, 1080))
 print("Processed:", n)
