@@ -42,7 +42,7 @@ args = parse_args()
 root_path = args.data
 resnet = args.resnet
 batch_size = args.batch
-output_path = args.output
+output_dir = args.output
 epochs = args.epochs
 w_center = args.w_center
 w_radius = args.w_radius
@@ -54,8 +54,14 @@ testing = args.testing
 
 print(testing)
 
-if os.path.exists(output_path):
-    raise FileExistsError("Model already exists")
+os.makedirs(output_dir, exist_ok=True)
+best_loss_path = os.path.join(output_dir, "best_loss.pt")
+best_iou1_path = os.path.join(output_dir, "best_iou1.pt")
+best_center_error1_path = os.path.join(output_dir, "best_center_error1.pt")
+
+for pth in [best_loss_path, best_iou1_path, best_center_error1_path]:
+    if os.path.exists(pth):
+        raise FileExistsError(f"Checkpoint already exists: {pth}")
 
 train_dl, val_dl, test_dl = get_loaders(root_path, batch_size=batch_size)
 
@@ -64,7 +70,9 @@ model = CircleRegressorResNet(backbone=resnet, pretrained=True, out_dim=6).to(de
 lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
-min_val_loss = float('inf')
+best_val_loss = float('inf')
+best_iou1 = float('-inf')
+best_center_error1 = float('inf')
 
 print(f"Training Started {resnet} on {root_path}")
 print(f"running for {epochs} epochs")
@@ -88,6 +96,11 @@ run = wandb.init(
             "w_iou_c2": w_iou_c2
         },
         "device": device,
+        "checkpoints": {
+            "best_loss": best_loss_path,
+            "best_iou1": best_iou1_path,
+            "best_center_error1": best_center_error1_path
+        }
     }
 )
 
@@ -142,7 +155,7 @@ for epoch in range(1, epochs + 1):
             targets = targets.to(device).float()
 
             preds = model(imgs)
-            loss = circle_loss(preds, targets)
+            loss = circle_loss(preds, targets, w_center=w_center, w_radius=w_radius, w_iou=w_iou, w_iou_c1=w_iou_c1, w_iou_c2=w_iou_c2)
 
             bs = imgs.size(0)
             val_loss_sum += loss.item() * bs
@@ -177,20 +190,34 @@ for epoch in range(1, epochs + 1):
     epoch_time = time.time() - epoch_start
     finished_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    if avg_val_loss < min_val_loss:
-        torch.save(model.state_dict(), output_path)
-        min_val_loss = avg_val_loss
+    # Save best-by-loss
+    if avg_val_loss < best_val_loss:
+        best_val_loss = avg_val_loss
+        torch.save(model.state_dict(), best_loss_path)
+
+    # Save best-by-iou1 (maximize)
+    if mean_iou1 > best_iou1:
+        best_iou1 = mean_iou1
+        torch.save(model.state_dict(), best_iou1_path)
+
+    # Save best-by-center-error1 (minimize)
+    if mean_c1 < best_center_error1:
+        best_center_error1 = mean_c1
+        torch.save(model.state_dict(), best_center_error1_path)
 
     wandb.log({
         "epoch": epoch,
         "lr": lr,
         "train/loss": avg_train_loss,
         "val/loss": avg_val_loss,
-        "val/best_loss": min_val_loss,
+        "val/best_loss": best_val_loss,
         "metrics/iou1": mean_iou1,
         "metrics/iou2": mean_iou2,
         "metrics/center-error1": mean_c1,
-        "metrics/center-error2": mean_c2
+        "metrics/center-error2": mean_c2,
+
+        "best/iou1": best_iou1,
+        "best/center-error1": best_center_error1
     })
 
     print(
