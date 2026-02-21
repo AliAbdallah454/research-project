@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import Subset
 
 import time
@@ -16,14 +17,13 @@ from src.loss_fn import circle_loss
 from src.data import get_loaders
 from eval.metrics import circle_iou_torch, center_error_torch
 
-
 def parse_args():
     p = argparse.ArgumentParser()
 
     p.add_argument("--resnet", required=True, help="ResNet type")
     p.add_argument("--data", required=True, help="Dataset root or config path")
     p.add_argument("--batch", type=int, required=True, help="Batch size")
-    p.add_argument("--output", required=True, help="Output path for model")
+    p.add_argument("--output", required=True, help="Output folder for the models")
     p.add_argument("--epochs", type=int, required=True, help="Number of training epochs")
 
     p.add_argument("--w-center", type=float, default=1.0, help="Penalty of center loss")
@@ -34,6 +34,7 @@ def parse_args():
     p.add_argument("--device", default='cuda', help="Device that runs computations")
 
     p.add_argument("--testing", action="store_true", default=False, help="Indicate wehter file is being tested")
+    p.add_argument("--name", default="circle-detection", help="Name of the run for wandb")
 
     return p.parse_args()
 
@@ -51,8 +52,10 @@ w_iou_c1 = args.w_iou_c1
 w_iou_c2 = args.w_iou_c2
 device = args.device
 testing = args.testing
+name = args.name
 
-print(testing)
+if testing:
+    print("\033[31mRUNNING IN TESTING MODE ...\033[0m")
 
 os.makedirs(output_dir, exist_ok=True)
 best_loss_path = os.path.join(output_dir, "best_loss.pt")
@@ -69,6 +72,7 @@ model = CircleRegressorResNet(backbone=resnet, pretrained=True, out_dim=6).to(de
 
 lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr)
+scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
 
 best_val_loss = float('inf')
 best_iou1 = float('-inf')
@@ -80,7 +84,7 @@ print(f"running for {epochs} epochs")
 run = wandb.init(
     entity='alikhaledabdallah454-universit-paris-saclay',
     project='Research Project',
-    name='circle-detection',
+    name=name,
     config={
         "learning_rate": lr,
         "Optimizer": "Adam",
@@ -135,14 +139,17 @@ for epoch in range(1, epochs + 1):
         if testing:
             break
 
+    scheduler.step()
+    current_lr = optimizer.param_groups[0]["lr"]
+
     avg_train_loss = train_loss_sum / max(1, train_count)
 
     model.eval()
     val_loss_sum = 0.0
     val_count = 0
 
-    val_pbar = tqdm(val_dl, total=len(val_dl), desc=f"Val   {epoch:02d}/{epochs}", leave=False)
-    
+    val_pbar = tqdm(test_dl, total=len(test_dl), desc=f"Val   {epoch:02d}/{epochs}", leave=False)
+
     n = 0
     sum_iou1 = 0.0
     sum_iou2 = 0.0
@@ -207,7 +214,7 @@ for epoch in range(1, epochs + 1):
 
     wandb.log({
         "epoch": epoch,
-        "lr": lr,
+        "lr": current_lr,
         "train/loss": avg_train_loss,
         "val/loss": avg_val_loss,
         "val/best_loss": best_val_loss,
