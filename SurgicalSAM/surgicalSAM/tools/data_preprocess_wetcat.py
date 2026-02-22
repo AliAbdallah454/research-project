@@ -42,7 +42,7 @@ def main():
     os.makedirs(emb_dir, exist_ok=True)
 
     sam = sam_model_registry[f"vit_{args.vit_mode}"](checkpoint=args.sam_ckpt)
-    sam.to("cpu")
+    sam.cuda()
     predictor = SamPredictor(sam)
 
     frames = sorted([f for f in os.listdir(img_dir) if f.endswith(".jpg")])
@@ -63,7 +63,7 @@ def main():
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         predictor.set_image(img)
-        feat = predictor.features.squeeze().permute(1,2,0).cpu().numpy()
+        feat = predictor.features.squeeze().permute(1,2,0).cuda().numpy()
         np.save(osp.join(feat_dir, stem + ".npy"), feat)
 
         for mask_name in masks_by_frame[stem]:
@@ -71,9 +71,9 @@ def main():
             mask = (mask == 255).astype(np.uint8) * 255
             rgb = np.stack([mask, np.zeros_like(mask), np.zeros_like(mask)], -1)
 
-            m = set_mask(rgb).to("cpu")
+            m = set_mask(rgb).cuda()
             m = F.interpolate(m, size=(64,64), mode="bilinear")
-            m = m.squeeze()[0].cpu().numpy()
+            m = m.squeeze()[0].cuda().numpy()
 
             if not (m > 0).any():
                 continue

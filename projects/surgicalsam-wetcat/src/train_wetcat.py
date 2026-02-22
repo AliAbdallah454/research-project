@@ -157,7 +157,7 @@ if vit_mode == "h":
     if args.sam_ckpt is not None:
         sam_checkpoint = args.sam_ckpt
 model_type = f"vit_{vit_mode}"
-sam = sam_model_registry[model_type](checkpoint=sam_checkpoint).to("cpu")
+sam = sam_model_registry[model_type](checkpoint=sam_checkpoint).cuda()
 
 sam_prompt_encoder = sam.prompt_encoder
 sam_decoder = sam.mask_decoder
@@ -170,7 +170,7 @@ for _, param in sam_decoder.named_parameters():
 
 print("======> Load Prototypes and Prototype-based Prompt Encoder")
 num_classes = 1 if dataset_name == "wetcat" else 7
-learnable_prototypes_model = Learnable_Prototypes(num_classes=num_classes, feat_dim=256).to("cpu")
+learnable_prototypes_model = Learnable_Prototypes(num_classes=num_classes, feat_dim=256).cuda()
 
 protoype_prompt_encoder = Prototype_Prompt_Encoder(
     feat_dim=256,
@@ -178,7 +178,7 @@ protoype_prompt_encoder = Prototype_Prompt_Encoder(
     hidden_dim_sparse=128,
     size=64,
     num_tokens=num_tokens
-).to("cpu")
+).cuda()
 
 with open(sam_checkpoint, "rb") as f:
     state_dict = torch.load(f)
@@ -204,8 +204,8 @@ for name, param in protoype_prompt_encoder.named_parameters():
 
 
 print("======> Define Optimiser and Loss")
-seg_loss_model = DiceLoss().to("cpu")
-contrastive_loss_model = losses.NTXentLoss(temperature=0.07).to("cpu")
+seg_loss_model = DiceLoss().cuda()
+contrastive_loss_model = losses.NTXentLoss(temperature=0.07).cuda()
 
 optimiser = torch.optim.Adam([
     {'params': learnable_prototypes_model.parameters()},
@@ -260,10 +260,10 @@ for epoch in range(num_epochs):
     epoch_steps = 0
 
     for it, (sam_feats, _, cls_ids, masks, class_embeddings) in enumerate(train_dataloader):
-        sam_feats = sam_feats.to("cpu")
-        cls_ids = cls_ids.to("cpu")
-        masks = masks.to("cpu")
-        class_embeddings = class_embeddings.to("cpu")
+        sam_feats = sam_feats.cuda()
+        cls_ids = cls_ids.cuda()
+        masks = masks.cuda()
+        class_embeddings = class_embeddings.cuda()
 
         prototypes = learnable_prototypes_model()
 
@@ -317,8 +317,8 @@ for epoch in range(num_epochs):
             # EndoVis validation (your original)
             binary_masks = dict()
             for it, (sam_feats, mask_names, cls_ids, _, _) in enumerate(val_dataloader):
-                sam_feats = sam_feats.to("cpu")
-                cls_ids = cls_ids.to("cpu")
+                sam_feats = sam_feats.cuda()
+                cls_ids = cls_ids.cuda()
 
                 preds, preds_quality = model_forward_function(
                     protoype_prompt_encoder, sam_prompt_encoder, sam_decoder,
@@ -356,9 +356,9 @@ for epoch in range(num_epochs):
             val_steps = 0
 
             for it, (sam_feats, _, cls_ids, masks, _) in enumerate(val_dataloader):
-                sam_feats = sam_feats.to("cpu")
-                cls_ids = cls_ids.to("cpu")
-                masks = masks.to("cpu")
+                sam_feats = sam_feats.cuda()
+                cls_ids = cls_ids.cuda()
+                masks = masks.cuda()
 
                 preds, _ = model_forward_function(
                     protoype_prompt_encoder, sam_prompt_encoder, sam_decoder,
