@@ -1,0 +1,13 @@
+__pycache__/
+*.pth
+*.pt
+*.ckpt
+*.zip
+*.tar
+*.tar.gz
+data/
+datasets/
+wetcatframes/
+work_dirs/
+runs/
+logs/
