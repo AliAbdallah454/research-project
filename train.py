@@ -25,6 +25,8 @@ def parse_args():
     p.add_argument("--batch", type=int, required=True, help="Batch size")
     p.add_argument("--output", required=True, help="Output folder for the models")
     p.add_argument("--epochs", type=int, required=True, help="Number of training epochs")
+    p.add_argument("--lr", type=float, default=1e-3, help="Initial Learning rate")
+    p.add_argument("--lr-min", type=float, default=1e-6, help="Minimum learning rate for cosine annealing")
 
     p.add_argument("--w-center", type=float, default=1.0, help="Penalty of center loss")
     p.add_argument("--w-radius", type=float, default=2.0, help="Penalty of radius loss")
@@ -45,6 +47,9 @@ resnet = args.resnet
 batch_size = args.batch
 output_dir = args.output
 epochs = args.epochs
+lr = args.lr
+lr_min = args.lr_min
+
 w_center = args.w_center
 w_radius = args.w_radius
 w_iou = args.w_iou
@@ -56,6 +61,7 @@ name = args.name
 
 if testing:
     print("\033[31mRUNNING IN TESTING MODE ...\033[0m")
+    name = "test-cd"
 
 os.makedirs(output_dir, exist_ok=True)
 best_loss_path = os.path.join(output_dir, "best_loss.pt")
@@ -70,9 +76,8 @@ train_dl, val_dl, test_dl = get_loaders(root_path, batch_size=batch_size)
 
 model = CircleRegressorResNet(backbone=resnet, pretrained=True, out_dim=6).to(device)
 
-lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr)
-scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
+scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=lr_min)
 
 best_val_loss = float('inf')
 best_iou1 = float('-inf')
@@ -87,6 +92,7 @@ run = wandb.init(
     name=name,
     config={
         "learning_rate": lr,
+        "learning_rate_min": lr_min,
         "Optimizer": "Adam",
         "architecture": resnet,
         "backbone": resnet,
@@ -148,7 +154,7 @@ for epoch in range(1, epochs + 1):
     val_loss_sum = 0.0
     val_count = 0
 
-    val_pbar = tqdm(test_dl, total=len(test_dl), desc=f"Val   {epoch:02d}/{epochs}", leave=False)
+    val_pbar = tqdm(val_dl, total=len(val_dl), desc=f"Val   {epoch:02d}/{epochs}", leave=False)
 
     n = 0
     sum_iou1 = 0.0
