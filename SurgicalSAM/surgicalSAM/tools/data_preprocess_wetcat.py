@@ -63,7 +63,7 @@ def main():
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         predictor.set_image(img)
-        feat = predictor.features.squeeze().permute(1,2,0).cuda().numpy()
+        feat = predictor.features.squeeze().permute(1,2,0).cpu().numpy()
         np.save(osp.join(feat_dir, stem + ".npy"), feat)
 
         for mask_name in masks_by_frame[stem]:
@@ -73,7 +73,7 @@ def main():
 
             m = set_mask(rgb).cuda()
             m = F.interpolate(m, size=(64,64), mode="bilinear")
-            m = m.squeeze()[0].cuda().numpy()
+            m = m.squeeze()[0].cpu().numpy()
 
             if not (m > 0).any():
                 continue
