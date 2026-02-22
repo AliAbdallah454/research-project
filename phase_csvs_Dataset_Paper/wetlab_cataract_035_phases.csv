@@ -1,0 +1,6 @@
+start,end,phase
+0.0,0.6,idle
+0.6,158.4,rhexis
+158.4,166.4,idle
+166.4,206.0,rhexis
+206.0,1004.366667,idle

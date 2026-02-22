@@ -1,0 +1,19 @@
+2026-02-20 13:50:50,222 INFO    MainThread:9204 [wandb_setup.py:_flush():81] Current SDK version is 0.25.0
+2026-02-20 13:50:50,222 INFO    MainThread:9204 [wandb_setup.py:_flush():81] Configure stats pid to 9204
+2026-02-20 13:50:50,222 INFO    MainThread:9204 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-02-20 13:50:50,222 INFO    MainThread:9204 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /mnt/data/wetcat_dataset/wetcat_code/wandb/offline-run-20260220_135050-2x2l2zv6/logs/debug.log
+2026-02-20 13:50:50,222 INFO    MainThread:9204 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /mnt/data/wetcat_dataset/wetcat_code/wandb/offline-run-20260220_135050-2x2l2zv6/logs/debug-internal.log
+2026-02-20 13:50:50,222 INFO    MainThread:9204 [wandb_init.py:init():844] calling init triggers
+2026-02-20 13:50:50,222 INFO    MainThread:9204 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'_wandb': {}}
+2026-02-20 13:50:50,222 INFO    MainThread:9204 [wandb_init.py:init():892] starting backend
+2026-02-20 13:50:50,494 INFO    MainThread:9204 [wandb_init.py:init():895] sending inform_init request
+2026-02-20 13:50:50,512 INFO    MainThread:9204 [wandb_init.py:init():903] backend started and connected
+2026-02-20 13:50:50,533 INFO    MainThread:9204 [wandb_init.py:init():973] updated telemetry
+2026-02-20 13:50:50,534 INFO    MainThread:9204 [wandb_init.py:init():997] communicating run to backend with 90.0 second timeout
+2026-02-20 13:50:50,622 INFO    MainThread:9204 [wandb_init.py:init():1042] starting run threads in backend
+2026-02-20 13:50:50,725 INFO    MainThread:9204 [wandb_run.py:_console_start():2524] atexit reg
+2026-02-20 13:50:50,725 INFO    MainThread:9204 [wandb_run.py:_redirect():2373] redirect: wrap_raw
+2026-02-20 13:50:50,725 INFO    MainThread:9204 [wandb_run.py:_redirect():2442] Wrapping output streams.
+2026-02-20 13:50:50,725 INFO    MainThread:9204 [wandb_run.py:_redirect():2465] Redirects installed.
+2026-02-20 13:50:50,727 INFO    MainThread:9204 [wandb_init.py:init():1082] run started, returning control to user process

@@ -1,0 +1,8 @@
+start,end,phase
+0.0,0.9,idle
+0.9,66.8,rhexis
+66.8,71.3,idle
+71.3,110.1,rhexis
+110.1,122.1,idle
+122.1,734.0,phacoemulsification
+734.0,734.516667,idle

@@ -1,0 +1,11 @@
+start,end,phase
+0.0,10.2,rest
+10.2,14.4,idle
+14.4,20.6,rest
+20.6,22.6,idle
+22.6,37.0,rest
+37.0,37.6,idle
+37.6,50.0,rest
+50.0,54.8,idle
+54.8,201.3,phacoemulsification
+201.3,208.2,idle

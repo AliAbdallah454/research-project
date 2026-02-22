@@ -1,0 +1,58 @@
+
+class import_config():
+    def __init__(self):
+        print('import_var initialized')
+
+    def execute(module_name):
+
+        criterion_supervised = module_name.criterion_supervised
+        criterion_SemiSupervised = module_name.criterion_SemiSupervised
+        datasets = module_name.datasets
+        Framework_name = module_name.Framework_name
+        num_classes = module_name.num_classes
+        Learning_Rates_init = module_name.Learning_Rates_init
+        epochs = module_name.epochs
+        batch_size = module_name.batch_size
+        size = module_name.size
+        Results_path = module_name.Results_path
+        Visualization_path = module_name.Visualization_path
+        Checkpoint_path = module_name.Checkpoint_path
+        CSV_path = module_name.CSV_path
+        project_name = module_name.project_name
+        load = module_name.load
+        load_path = module_name.load_path
+        net_name = module_name.net_name
+        test_per_epoch = module_name.test_per_epoch
+        Net1 = module_name.Net1
+        hard_label_thr = module_name.hard_label_thr
+        SemiSupervised_batch_size = module_name.SemiSupervised_batch_size
+        SemiSupervised_initial_epoch = module_name.SemiSupervised_initial_epoch
+        image_transforms = module_name.image_transforms 
+        affine = module_name.affine
+        affine_transforms = module_name.affine_transforms 
+        LW = module_name.LW
+        EMA_decay = module_name.EMA_decay
+        Alpha = module_name.Alpha
+        strategy = module_name.strategy
+        GCC = module_name.GCC
+        TrainIDs_path = module_name.TrainIDs_path
+
+
+        return criterion_supervised, criterion_SemiSupervised, datasets, Framework_name, num_classes, \
+             Learning_Rates_init, epochs, batch_size, size,\
+                 Results_path, Visualization_path,\
+                 CSV_path, project_name, load, load_path, net_name,\
+                      test_per_epoch, Checkpoint_path, Net1,\
+                         hard_label_thr, SemiSupervised_batch_size, SemiSupervised_initial_epoch,\
+                             image_transforms, affine, affine_transforms, LW,\
+                                 EMA_decay, Alpha, strategy, GCC, TrainIDs_path
+
+
+    # def try_import (name):
+    #     try:
+            
+    #     except OSError:
+
+    #         pass                             
+        
+           

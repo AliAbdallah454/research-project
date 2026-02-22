@@ -1,0 +1,21 @@
+2026-02-21 12:10:42,605 INFO    MainThread:3390 [wandb_setup.py:_flush():81] Current SDK version is 0.25.0
+2026-02-21 12:10:42,605 INFO    MainThread:3390 [wandb_setup.py:_flush():81] Configure stats pid to 3390
+2026-02-21 12:10:42,605 INFO    MainThread:3390 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-02-21 12:10:42,605 INFO    MainThread:3390 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /mnt/data/wetcat_dataset/wetcat_code/wandb/offline-run-20260221_121042-vr6xyvxg/logs/debug.log
+2026-02-21 12:10:42,605 INFO    MainThread:3390 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /mnt/data/wetcat_dataset/wetcat_code/wandb/offline-run-20260221_121042-vr6xyvxg/logs/debug-internal.log
+2026-02-21 12:10:42,605 INFO    MainThread:3390 [wandb_init.py:init():844] calling init triggers
+2026-02-21 12:10:42,605 INFO    MainThread:3390 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'_wandb': {}}
+2026-02-21 12:10:42,605 INFO    MainThread:3390 [wandb_init.py:init():892] starting backend
+2026-02-21 12:10:42,879 INFO    MainThread:3390 [wandb_init.py:init():895] sending inform_init request
+2026-02-21 12:10:42,898 INFO    MainThread:3390 [wandb_init.py:init():903] backend started and connected
+2026-02-21 12:10:42,919 INFO    MainThread:3390 [wandb_init.py:init():973] updated telemetry
+2026-02-21 12:10:42,920 INFO    MainThread:3390 [wandb_init.py:init():997] communicating run to backend with 90.0 second timeout
+2026-02-21 12:10:43,010 INFO    MainThread:3390 [wandb_init.py:init():1042] starting run threads in backend
+2026-02-21 12:10:43,113 INFO    MainThread:3390 [wandb_run.py:_console_start():2524] atexit reg
+2026-02-21 12:10:43,113 INFO    MainThread:3390 [wandb_run.py:_redirect():2373] redirect: wrap_raw
+2026-02-21 12:10:43,113 INFO    MainThread:3390 [wandb_run.py:_redirect():2442] Wrapping output streams.
+2026-02-21 12:10:43,113 INFO    MainThread:3390 [wandb_run.py:_redirect():2465] Redirects installed.
+2026-02-21 12:10:43,115 INFO    MainThread:3390 [wandb_init.py:init():1082] run started, returning control to user process
+2026-02-21 12:10:45,260 INFO    wandb-AsyncioManager-main:3390 [service_client.py:_forward_responses():134] Reached EOF.
+2026-02-21 12:10:45,260 INFO    wandb-AsyncioManager-main:3390 [mailbox.py:close():155] Closing mailbox, abandoning 0 handles.

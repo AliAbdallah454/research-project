@@ -1,0 +1,5 @@
+Results/
+frames/
+Segmentation_Masks/
+*.pth
+old_train.py
