@@ -7,15 +7,17 @@ import os
 import torch
 import torchvision.transforms as T
 
-import argparse
-
 from tqdm import tqdm
 
 from classical_methods.red_circle_detection import detect_red_circle
+
 from src.metrics import circle_iou
 from src.architectures import CircleRegressorResNet
 from src.helpers import get_gt_circles, read_manual_results, predict_on_cv2_frames
 
+import argparse
+
+from typing import List
 
 print("cwd: ", os.getcwd())
 
