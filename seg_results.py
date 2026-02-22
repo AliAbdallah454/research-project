@@ -27,7 +27,7 @@ def main():
     my_conf = importlib.import_module(config_file)
     
     params = import_config.execute(my_conf)
-    num_classes = 1  
+    num_classes = 2 
     Results_path = params[9]
     Checkpoint_path = params[17]
     Framework_name = params[3]
