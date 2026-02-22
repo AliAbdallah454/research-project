@@ -18,7 +18,7 @@ import torch.nn as nn
 project_name ="WetLab_AnatomyInst"
 
 # For binary segmentation, num_classes = 1 (the backgroung class is not considered)
-num_classes =1
+num_classes =2
 
 Framework_name = "Supervised_DeepLabV3Plus_Res50_JustInstruments"
 
