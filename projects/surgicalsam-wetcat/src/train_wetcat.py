@@ -37,6 +37,9 @@ parser.add_argument("--seq", type=str, default="seq1",
                     help="WetCat sequence folder name (default seq1)")
 parser.add_argument("--val_ratio", type=float, default=0.2,
                     help="WetCat random split ratio (0.2 = 80/20)")
+parser.add_argument("--resume", type=str, default=None, help="path to checkpoint to resume from")
+parser.add_argument("--start_epoch", type=int, default=0, help="start epoch number")
+parser.add_argument("--epochs", type=int, default=None, help="override num_epochs")
 args = parser.parse_args()
 debug = args.debug
 
@@ -126,7 +129,8 @@ elif "17" in dataset_name:
 elif dataset_name == "wetcat":
     # WetCat is binary instrument segmentation => 1 class
     num_tokens = 2
-    num_epochs = 20
+    if args.epochs is not None:
+        num_epochs = args.epochs
     lr = 0.0005
     save_dir = "./work_dirs/wetcat/"
     if args.save_dir is not None:
@@ -230,7 +234,7 @@ val_ious = []
 val_dices = []
 
 
-for epoch in range(num_epochs):
+for epoch in range(args.start_epoch, num_epochs):
 
     # choose the augmentation version to use for the current epoch
     if epoch % 2 == 0:
@@ -252,6 +256,12 @@ for epoch in range(num_epochs):
     # -----------------------------
     # Training
     # -----------------------------
+    if args.resume is not None:
+        ckp = torch.load(args.resume, map_location="cuda")
+        protoype_prompt_encoder.load_state_dict(ckp["prototype_prompt_encoder_state_dict"])
+        sam_decoder.load_state_dict(ckp["sam_decoder_state_dict"])
+        learnable_prototypes_model.load_state_dict(ckp["prototypes_state_dict"])
+        print(f"Resumed weights from: {args.resume}")
     protoype_prompt_encoder.train()
     sam_decoder.train()
     learnable_prototypes_model.train()
