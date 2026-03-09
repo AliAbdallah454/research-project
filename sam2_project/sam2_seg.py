@@ -19,14 +19,26 @@ import torch
 import numpy as np
 import cv2
 import os
+import argparse
 # using video predictor
 from sam2.build_sam import build_sam2_video_predictor
 
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument("--checkpoint-path", default="/mnt/data/wetcat_dataset/wetcat_code/sam2_project/checkpoints/sam2_hiera_large.pt", 
+                   help="SAM2 weights path")
+    p.add_argument("--frames-path", required=True, help="Directory containing {i}.jpg frames")
+    p.add_argument("--out-path", required=True, help="Directory where masks will be stored")
+
+    return p.parse_args()
+
+args = parse_args()
+
 #  cofig folders
-CHECKPOINT = "/mnt/data/wetcat_dataset/wetcat_code/sam2_project/checkpoints/sam2_hiera_large.pt"
+CHECKPOINT = args.checkpoint_path
 MODEL_CFG = "sam2_hiera_l.yaml"
-FRAME_DIR = '/mnt/data/wetcat_dataset/wetcat_code/sam2_project/gepromed_frames_test/'
-BASE_OUTPUT_DIR = '/mnt/data/wetcat_dataset/wetcat_code/sam2_project/segmented_masks_v1/'
+FRAME_DIR = args.frames_path
+BASE_OUTPUT_DIR = args.out_path
 
 os.makedirs(BASE_OUTPUT_DIR, exist_ok=True)
 # sub directories
