@@ -6,6 +6,15 @@ Created on Thu Mar 19 13:20:25 2026
 @author: djayadeep
 """
 
+''' 
+Clone SAM2:
+pip install --no-cache-dir -U git+https://github.com/facebookresearch/segment-anything-2.git
+Create checkpoint directory
+mkdir -p /mnt/data/wetcat_dataset/wetcat_code/sam2_project/checkpoints
+Download pretrained model
+wget -P /mnt/data/wetcat_dataset/wetcat_code/sam2_project/checkpoints/ https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_large.pt
+'''
+
 import torch
 import numpy as np
 import cv2
